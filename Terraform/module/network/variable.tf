@@ -11,9 +11,6 @@ variable "prefix" {
 }
 
 
-variable "env" {
-  type = string
-}
 
 
 variable "region" {
