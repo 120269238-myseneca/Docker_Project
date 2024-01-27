@@ -1,5 +1,4 @@
 name: Deploy to ECR
-# updated secrets
 on:
   push:
     branches: [master]
@@ -14,30 +13,45 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
           AWS_REGION: us-east-1
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Check and Create ECR Repository if needed
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: docker-assignment
+          AWS_REGION: us-east-1
+        run: |
+          set -e
+          REPO_EXISTENCE=$(aws ecr describe-repositories --repository-names $ECR_REPOSITORY --region $AWS_REGION 2>/dev/null || true)
+
+          if [ -z "$REPO_EXISTENCE" ]; then
+            aws ecr create-repository --repository-name $ECR_REPOSITORY --region $AWS_REGION
+          fi
 
       - name: Build and Push Application IMAGE TO ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: docker-assignment
           IMAGE_TAG: v0.1
+          APPLICATION_ECR_PREFIX: app-image
         run: |
           cd web_application/
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/${APPLICATION_ECR_PREFIX}-$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile .
+          docker push $ECR_REGISTRY/${APPLICATION_ECR_PREFIX}-$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Build and Push DATABASE IMAGE TO ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: docker-assignment
           IMAGE_TAG: v0.1
+          DATABASE_ECR_PREFIX: database-image
         run: |
           cd web_application/
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile_mysql .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/${DATABASE_ECR_PREFIX}-$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile_mysql .
+          docker push $ECR_REGISTRY/${DATABASE_ECR_PREFIX}-$ECR_REPOSITORY:$IMAGE_TAG
