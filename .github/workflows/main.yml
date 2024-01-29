@@ -21,6 +21,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+
       - name: Build and Push Application IMAGE TO ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -31,6 +32,7 @@ jobs:
           cd web_application/
           docker build -t $ECR_REGISTRY/${APPLICATION_ECR_PREFIX}-$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile .
           docker push $ECR_REGISTRY/${APPLICATION_ECR_PREFIX}-$ECR_REPOSITORY:$IMAGE_TAG
+
 
       - name: Build and Push DATABASE IMAGE TO ECR
         env:
