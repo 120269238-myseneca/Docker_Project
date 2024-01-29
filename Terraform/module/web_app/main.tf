@@ -17,10 +17,11 @@ data "aws_availability_zones" "available" {
 
 
 locals {
-  default_tags = var.default_tags
-  name_prefix = "${local.name_prefix}"
+  default_tags = merge(
+    var.default_tags,
+  )
+  name_prefix = "${var.prefix}"
 }
-
 
 
 # Instance

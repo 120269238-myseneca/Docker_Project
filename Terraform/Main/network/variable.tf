@@ -1,26 +1,33 @@
 variable "default_tags" {
-  default = {}
-  type    = map(any)
-
+  type    = map(string)
+  default = {
+    "Owner" = "Sudeep"
+    "App"   = "Web"
+  }
 }
 
-
-# Name prefix
 variable "prefix" {
-  type = string
+  default = "docker-Sudeep"
+  type    = string
 }
 
 
 
 
 variable "region" {
-  type = string
+  default = "us-east-1"
+  type    = string
 }
 
 variable "vpc" {
-  type = map(string)
+  default = "10.10.0.0/16"
+  type = string
 }
 
+
+
+
 variable "public_cidr" {
-  type = map(string)
+  default = "10.10.0.0/24"
+  type = string
 }

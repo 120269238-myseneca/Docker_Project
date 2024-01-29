@@ -18,9 +18,9 @@ variable "region" {
 }
 
 variable "vpc" {
-  type = map(string)
+  type = string
 }
 
 variable "public_cidr" {
-  type = map(string)
+  type = string
 }

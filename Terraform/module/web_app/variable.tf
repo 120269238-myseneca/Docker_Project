@@ -34,7 +34,8 @@ variable "subnet_id" {
 
 
 variable "sg_id" {
-  type = string
+  type    = list(string)
+  default = []
 }
 
 

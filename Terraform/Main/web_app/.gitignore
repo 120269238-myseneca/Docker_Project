@@ -1,0 +1,6 @@
+terraform.lock.hcl
+docker-Sudeep
+docker-Sudeep.pub
+terraform.tfstate
+terraform.tfstate.backup
+terraform.lock.hcl
