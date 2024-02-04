@@ -22,5 +22,5 @@ variable "vpc" {
 }
 
 variable "public_cidr" {
-  type = string
+  type = list(string)
 }

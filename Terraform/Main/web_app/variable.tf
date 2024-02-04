@@ -1,10 +1,9 @@
 variable "default_tags" {
-  type    = map(string)
-  default = {
-    "Owner" = "Sudeep"
-    "App"   = "Web"
-  }
+  default = {}
+  type    = map(any)
+
 }
+
 
 variable "prefix" {
   default = "docker-Sudeep"
