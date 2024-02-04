@@ -18,7 +18,7 @@ data "terraform_remote_state" "network" {
 locals {
   default_tags = merge(
     var.default_tags,
-    # Add any additional default tags here
+  
   )
   name_prefix = "${var.prefix}"
 }
@@ -302,4 +302,3 @@ resource "aws_lb_listener" "app_listener_8083" {
     target_group_arn = aws_lb_target_group.tg_pink.arn 
   }
 }
-

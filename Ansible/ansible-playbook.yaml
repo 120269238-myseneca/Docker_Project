@@ -28,7 +28,7 @@
       ansible.builtin.pip:
         name: requests
         state: present
-        executable: /usr/bin/pip3 # Adjust the path to match the correct pip executable
+        executable: /usr/bin/pip3
 
 - name: Setup Docker and Run Containers
   hosts: tag__Name_docker_Sudeep_web_app
