@@ -21,18 +21,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Check and Create ECR Repository if needed
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: docker-assignment
-          AWS_REGION: us-east-1
-        run: |
-          set -e
-          REPO_EXISTENCE=$(aws ecr describe-repositories --repository-names $ECR_REPOSITORY --region $AWS_REGION 2>/dev/null || true)
-
-          if [ -z "$REPO_EXISTENCE" ]; then
-            aws ecr create-repository --repository-name $ECR_REPOSITORY --region $AWS_REGION
-          fi
 
       - name: Build and Push Application IMAGE TO ECR
         env:
@@ -44,6 +32,7 @@ jobs:
           cd web_application/
           docker build -t $ECR_REGISTRY/${APPLICATION_ECR_PREFIX}-$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile .
           docker push $ECR_REGISTRY/${APPLICATION_ECR_PREFIX}-$ECR_REPOSITORY:$IMAGE_TAG
+
 
       - name: Build and Push DATABASE IMAGE TO ECR
         env:
