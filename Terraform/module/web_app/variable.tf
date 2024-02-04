@@ -28,17 +28,20 @@ variable "key_name" {
 
 
 variable "subnet_id" {
-  type = string
+  type    = list(string)
 }
 
 
 
 variable "sg_id" {
   type    = list(string)
-  default = []
 }
 
 
 variable "user_data" {
   type = string
+}
+
+variable "iam_instance_profile" {
+  type        = string
 }

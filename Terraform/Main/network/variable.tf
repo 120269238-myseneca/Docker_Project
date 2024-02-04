@@ -1,9 +1,6 @@
 variable "default_tags" {
   type    = map(string)
-  default = {
-    "Owner" = "Sudeep"
-    "App"   = "Web"
-  }
+  default = {}
 }
 
 variable "prefix" {
@@ -28,6 +25,6 @@ variable "vpc" {
 
 
 variable "public_cidr" {
-  default = "10.10.0.0/24"
-  type = string
+  default = ["10.10.0.0/24","10.10.1.0/24"]
+  type = list(string)
 }

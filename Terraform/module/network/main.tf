@@ -25,13 +25,14 @@ resource "aws_vpc" "main_cidr" {
 
 
 resource "aws_subnet" "public_subnet" {
+  count                   = length(var.public_cidr)
   vpc_id                  = aws_vpc.main_cidr.id
-  cidr_block              = var.public_cidr
+  cidr_block              = var.public_cidr[count.index]
   map_public_ip_on_launch = true
-  availability_zone       = data.aws_availability_zones.available.names[0]
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
   tags = merge(
     local.default_tags, {
-      Name = "${local.name_prefix}-public-subnet"
+      Name = "${local.name_prefix}-public-subnet-${count.index + 1}"
     }
   )
 }
@@ -60,6 +61,7 @@ resource "aws_route_table" "public_routetable" {
 }
 
 resource "aws_route_table_association" "public__subnet_routetable_assoication" {
-  subnet_id      = aws_subnet.public_subnet.id
+  count          = length(aws_subnet.public_subnet)
+  subnet_id      = aws_subnet.public_subnet[count.index].id
   route_table_id = aws_route_table.public_routetable.id
 }

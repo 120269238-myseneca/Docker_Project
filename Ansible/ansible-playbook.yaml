@@ -1,0 +1,127 @@
+---
+- name: Keys
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Check if the instance key exists
+      stat:
+        path: "./docker-Sudeep"
+      register: docker_Sudeep_stat
+
+    - name: Copy instance key to Ansible directory
+      copy:
+        src: "../Terraform/Main/web_app/docker-Sudeep"
+        dest: "./docker-Sudeep"
+        remote_src: no
+      when: not docker_Sudeep_stat.stat.exists
+
+    - name: Set correct permissions on the instance key
+      file:
+        path: "./docker-Sudeep"
+        mode: "0600"
+      when: not docker_Sudeep_stat.stat.exists
+    - name: Ensure Python 'requests' library is installed
+      ansible.builtin.pip:
+        name: requests
+        state: present
+    - name: Ensure Python 'requests' library is installed
+      ansible.builtin.pip:
+        name: requests
+        state: present
+        executable: /usr/bin/pip3  # Adjust the path to match the correct pip executable
+
+
+- name: Setup Docker and Run Containers
+  hosts: tag__Name_docker_Sudeep_web_app
+  become: yes
+  vars:
+
+    ansible_ssh_private_key_file: "./docker-Sudeep"
+    ECR: "494992235231.dkr.ecr.us-east-1.amazonaws.com"
+    DBECR: "{{ ECR }}/database-image-docker-assignment:v0.1"
+    APPECR: "{{ ECR }}/app-image-docker-assignment:v0.1"
+    DBPORT: 3306
+    DBUSER: "root"
+    DATABASE: "employees"
+    DBPWD: "pw"
+    APP_COLORS: ["blue", "green", "pink"]
+    AWS_ACCESS_KEY_ID: ASIAXGP6WDLPVVIOKP4T
+    AWS_SECRET_ACCESS_KEY: fWHc9u+7yS9EbLlh8IW+YM2byubh8qiCKPfGSpHQ
+    AWS_SESSION_TOKEN: FwoGZXIvYXdzEMT//////////wEaDKQVDySEubZTfyN8HiLGATn/9ksAerMZosZPTOeKoyZ2xHvv/JIwJ3zhojJ29tDLzHTh0U1cEyGuulNfCSQESqtHF2erimV7Ui1dAhPl7nfWikecIsXswMdo4bxkMAFyg8AYgeKvSeiDb6qMfPxGG6iSu6i8mpNP0T/xvxGMBDDhavQa3eZWFHlIn8nbcg5Q2kQjco8AgSPlPcpq6I48iwH/b9NWPrHB+8ArmpNoOGqtKYlsRZuIRzOe+gfHxXu3GkTW+9eBJqQj81/Pch9GpVr2P4yM7ii0lvqtBjItbKOFS3PYkPJmOu0pEuYfkHBpuEeejf09HfPSl9DqAPVZ9+o6qliIbR+3KkKh
+
+
+  tasks:
+    - name: Update all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
+      when: ansible_os_family == "RedHat"
+
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add ec2-user to Docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: Login to AWS ECR
+      community.docker.docker_login:
+        username: AWS
+        password: "{{ lookup('ansible.builtin.pipe', 'aws ecr get-login-password --region us-east-1') }}"
+        registry_url: "{{ ECR }}"
+
+
+
+    - name: Pull database Docker image
+      docker_image:
+        name: "{{ DBECR }}"
+        source: pull
+
+    - name: Pull app Docker image
+      docker_image:
+        name: "{{ APPECR }}"
+        source: pull
+
+    - name: Create Docker network
+      docker_network:
+        name: sudeepBridge
+
+    - name: Run MySQL Docker container
+      docker_container:
+        name: mysql-db
+        image: "{{ DBECR }}"
+        network_mode: sudeepBridge
+        env:
+          MYSQL_ROOT_PASSWORD: "{{ DBPWD }}"
+        detached: yes
+
+    - name: Wait for MySQL to initialize
+      wait_for:
+        timeout: 40
+
+    - name: Run App Docker containers
+      docker_container:
+        name: "{{ item }}"
+        image: "{{ APPECR }}"
+        network_mode: sudeepBridge
+        published_ports:
+          - "808{{ loop.index }}:8080"
+        env:
+          APP_COLOR: "{{ item }}"
+          DBHOST: mysql-db
+          DBPORT: "{{ DBPORT }}"
+          DBUSER: "{{ DBUSER }}"
+          DBPWD: "{{ DBPWD }}"
+        detached: yes
+      loop: "{{ APP_COLORS }}"
