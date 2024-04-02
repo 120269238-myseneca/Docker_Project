@@ -26,7 +26,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: docker-assignment
-          IMAGE_TAG: v0.1
+          IMAGE_TAG: v0.3
           APPLICATION_ECR_PREFIX: app-image
         run: |
           cd web_application/
@@ -38,7 +38,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: docker-assignment
-          IMAGE_TAG: v0.1
+          IMAGE_TAG: v0.3
           DATABASE_ECR_PREFIX: database-image
         run: |
           cd web_application/
